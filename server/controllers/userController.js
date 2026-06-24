@@ -5,17 +5,17 @@ import cloudinary from "../lib/cloudinary.js"
 
 
 // signup a new user
-export const signup = async ()=>{
+export const signup = async (req, res)=>{
     const {fullName, email, password, bio} = req.body;
 
     try {
         if(!fullName || !email || !password || !bio){
-            return resizeBy.json({success: false, message: "Missing Details"})
+            return res.json({success: false, message: "Missing Details"})
         }
         const user = await User.findOne({email});
 
         if(user){
-             return resizeBy.json({success: false, message: "Account already exists"})
+             return res.json({success: false, message: "Account already exists"})
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -29,7 +29,7 @@ export const signup = async ()=>{
 
         res.json({success: true, userData: newUser, token, message: "Account created successfully"})
     } catch (error) {
-        console.log();
+        console.log(error.message);
         
         res.json({success: false, message: error.message})
     }
@@ -41,6 +41,11 @@ export const login = async(req, res) =>{
         const {email, password} = req.body;
         const userData = await User.findOne({email})
 
+        //check if user exists
+        if(!userData){
+            return res.json({success: false, message: "User not found"})
+        }
+
         const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
         if(!isPasswordCorrect){
@@ -51,7 +56,7 @@ export const login = async(req, res) =>{
 
         res.json({success: true, userData, token, message: "Login successfully"})
     } catch (error) {
-        console.log();
+        console.log(error.message);
         res.json({success: false, message: error.message})
     }
 }
@@ -72,7 +77,7 @@ export const updateProfile = async(req, res)=>{
         let updatedUser;
 
         if (!profilePic) {
-            await User.findByIdAndUpdate(userId, {bio, fullName}, {new: true});
+            updatedUser = await User.findByIdAndUpdate(userId, {bio, fullName}, {new: true});
         }
         else{
             const upload = await cloudinary.uploader.upload(profilePic);
