@@ -63,7 +63,7 @@ The entire application is deployed online using **Vercel**, making it accessible
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### 1. Clone Repository
 
